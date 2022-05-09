@@ -1,0 +1,88 @@
+stages:
+  - api_build
+  - api_test
+  - api_quality
+  - api_package
+  - webapp_build
+
+cache:
+  paths:
+    - .m2/repository
+  key: "$CI_JOB_NAME"
+
+api_build_job:
+  stage: api_build
+  script:
+    - cd api
+    - ./mvnw compile
+      -Dhttps.protocols=TLSv1.2
+      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+      -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
+      -Dorg.slf4j.simpleLogger.showDateTime=true
+      -Djava.awt.headless=true
+      --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
+  image: openjdk:8-alpine
+
+api_test_job:
+  stage: api_test
+  script:
+    - cd api
+    - ./mvnw test
+      -Dhttps.protocols=TLSv1.2
+      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+      -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
+      -Dorg.slf4j.simpleLogger.showDateTime=true
+      -Djava.awt.headless=true
+      --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
+  image: openjdk:8-alpine
+
+api_code_quality_job:
+  stage: api_quality
+  image: docker:stable
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  script:
+    - cd api
+    - mkdir codequality-results
+    - docker run
+        --env CODECLIMATE_CODE="$PWD"
+        --volume "$PWD":/code
+        --volume /var/run/docker.sock:/var/run/docker.sock
+        --volume /tmp/cc:/tmp/cc
+        codeclimate/codeclimate analyze -f html > ./codequality-results/index.html
+  artifacts:
+    paths:
+      - api/codequality-results/
+
+api_package_job:
+  stage: api_package
+  services:
+    - docker:stable-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  script:
+    - cd api
+    - apk add --no-cache docker
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - ./mvnw install -PbuildDocker -DskipTests=true -DpushImage
+      -Dhttps.protocols=TLSv1.2
+      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+      -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
+      -Dorg.slf4j.simpleLogger.showDateTime=true
+      -Djava.awt.headless=true
+      --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
+  image: openjdk:8-alpine
+
+webapp_build_job:
+  stage: webapp_build
+  script:
+    - cd webapp
+    - ./mvnw compile
+      -Dhttps.protocols=TLSv1.2
+      -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+      -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN
+      -Dorg.slf4j.simpleLogger.showDateTime=true
+      -Djava.awt.headless=true
+      --batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true
+  image: openjdk:8-alpine
