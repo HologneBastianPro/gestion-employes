@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Employee Web Application</title>
+    <!--   <link rel="stylesheet" href="style.css">
+       <script src="script.js"></script> -->
+</head>
+<body>
+
+<h1>Système de gestion des employées</h1>
+<div>
+
+    <h2 class="h2">Modification d'un employée</h2>
+
+    <form method="post" th:action="@{/saveEmployee}" th:object="${employee}">
+        <input th:field="*{id}" type="hidden">
+        <input required th:field="*{firstName}" type="text">
+        <input required th:field="*{lastName}" type="text">
+        <input required th:field="*{mail}" type="text">
+        <button type="submit">Modifier</button>
+    </form>
+</div>
+
+<h4><a th:href="@{/}">Retour</a></h4>
+
+
+</body>
+</html>

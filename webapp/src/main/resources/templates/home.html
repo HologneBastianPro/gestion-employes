@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Employee Web Application</title>
+    <!--   <link rel="stylesheet" href="style.css">
+       <script src="script.js"></script> -->
+    <style>
+        th {
+            padding: 0 15px;
+        }
+        td {
+            padding: 0 15px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<h1>Système de gestion des employées</h1>
+
+<div>
+    <h2>Liste des employées</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Prénom</th>
+            <th>Nom</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${employees.empty}">
+            <td colspan="3">Aucun employée en base de données</td>
+        </tr>
+        <tr th:each="employee: ${employees}">
+            <td><span th:text="${employee.firstName}"> Prénom </span></td>
+            <td><span th:text="${employee.lastName}"> Nom </span></td>
+            <td><a th:href="@{/deleteEmployee/{id}(id=${employee.id})}">Supprimer</a></td>
+            <td><a th:href="@{/updateEmployee/{id}(id=${employee.id})}">Modifier</a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<h4><a th:href="@{/createEmployee}">Ajouter un nouvel employée</a></h4>
+
+
+</body>
+</html>

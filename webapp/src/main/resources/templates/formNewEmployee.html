@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Employee Web Application</title>
+    <!--   <link rel="stylesheet" href="style.css">
+       <script src="script.js"></script> -->
+</head>
+<body>
+
+
+<h1>Système de gestion des employées</h1>
+
+<div>
+
+    <h2 class="h2">Ajout d'un nouvel employée</h2>
+
+    <form method="post" th:action="@{/saveEmployee}" th:object="${employee}">
+        <input placeholder="Saisir le prénom" required th:field="*{firstName}" type="text">
+        <input placeholder="Saisir le nom" required th:field="*{lastName}" type="text">
+        <input placeholder="Saisir l'adresse email" required th:field="*{mail}" type="text">
+        <input placeholder="Mot de passe" required th:field="*{password}" type="password">
+        <button type="submit">Créer</button>
+    </form>
+</div>
+
+<h4><a th:href="@{/}">Retour</a></h4>
+
+
+</body>
+</html>
